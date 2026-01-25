@@ -15,6 +15,7 @@ class PCA_ANN_FaceRecognition:
         self.feature_vector = None
         self.signatures = None
         self.labels = None
+        self.label_names = None
         self.ann_model = None
         self.img_height = None
         self.img_width = None
@@ -187,7 +188,8 @@ class PCA_ANN_FaceRecognition:
         eigenfaces : numpy array of shape (k, m*n)
         """
         print("Generating eigenfaces...")
-        eigenfaces = np.dot(feature_vector.T, phi.T)
+        # Fixed: Corrected matrix multiplication
+        eigenfaces = np.dot(phi, feature_vector).T
         return eigenfaces
     
     def generate_signatures(self, eigenfaces, phi):
@@ -320,6 +322,7 @@ class PCA_ANN_FaceRecognition:
         
         # Load full dataset
         face_db, labels, label_names = self.load_dataset(dataset_path)
+        self.label_names = label_names
         
         # Split dataset
         indices = np.arange(face_db.shape[1])
@@ -405,22 +408,42 @@ def evaluate_different_k_values(dataset_path, k_values):
 
 def main():
     # =================================================================
-    # DATASET PATH - MODIFY THIS TO POINT TO YOUR DATASET LOCATION
+    # DATASET PATHS - YOUR ACTUAL PATHS
     # =================================================================
-    dataset_path = "path/to/your/dataset"  # <-- CHANGE THIS PATH
-    
-    # Example: dataset_path = "C:/Users/YourName/Desktop/dataset"
-    # or: dataset_path = "/home/user/datasets/face_dataset"
+    face_dataset_path = r"C:\Users\Dell\OneDrive\Desktop\icat project\project1\dataset\faces"
+    iris_dataset_path = r"C:\Users\Dell\OneDrive\Desktop\icat project\project1\dataset\Iris"
     
     print("PCA-ANN Face Recognition System")
     print("="*60)
+    
+    # Choose which dataset to use
+    print("\nSelect dataset:")
+    print("1. Face Dataset")
+    print("2. Iris Dataset")
+    choice = input("Enter choice (1 or 2): ")
+    
+    if choice == "1":
+        dataset_path = face_dataset_path
+        print("\nUsing Face Dataset...")
+    elif choice == "2":
+        dataset_path = iris_dataset_path
+        print("\nUsing Iris Dataset...")
+    else:
+        print("Invalid choice. Using Face Dataset by default...")
+        dataset_path = face_dataset_path
+    
+    # Verify dataset path exists
+    if not os.path.exists(dataset_path):
+        print(f"\nERROR: Dataset path does not exist: {dataset_path}")
+        print("Please check the path and try again.")
+        return
     
     # Part (a): Evaluate with different k values
     print("\nPart (a): Evaluating with different k values...")
     k_values = [10, 20, 30, 40, 50, 75, 100, 150]
     evaluate_different_k_values(dataset_path, k_values)
     
-    # Part (b): Train final model and test with imposters
+    # Part (b): Train final model
     print("\n" + "="*60)
     print("Part (b): Training final model...")
     print("="*60)
@@ -429,25 +452,28 @@ def main():
     model.train(dataset_path, k=50)
     
     # =================================================================
-    # IMPOSTER DETECTION
-    # To test with imposters (people not in training set):
-    # 1. Place imposter images in a separate folder
-    # 2. Uncomment and modify the code below:
+    # IMPOSTER DETECTION (Optional)
+    # Uncomment below to test with imposters
     # =================================================================
     
-    # imposter_folder = "path/to/imposter/images"  # <-- CHANGE THIS
-    # imposter_images = glob.glob(os.path.join(imposter_folder, '*.*'))
+    # imposter_folder = r"C:\Users\Dell\OneDrive\Desktop\icat project\project1\dataset\imposters"
     # 
-    # print("\nTesting with imposters...")
-    # threshold = 0.5  # Confidence threshold for recognition
-    # 
-    # for img_path in imposter_images:
-    #     predicted_label, confidence = model.predict(img_path)
+    # if os.path.exists(imposter_folder):
+    #     imposter_images = glob.glob(os.path.join(imposter_folder, '*.*'))
     #     
-    #     if confidence < threshold:
-    #         print(f"{os.path.basename(img_path)}: NOT ENROLLED (confidence: {confidence:.2f})")
-    #     else:
-    #         print(f"{os.path.basename(img_path)}: Recognized as {model.label_names[predicted_label]} (confidence: {confidence:.2f})")
+    #     print("\nTesting with imposters...")
+    #     threshold = 0.5  # Confidence threshold for recognition
+    #     
+    #     for img_path in imposter_images:
+    #         try:
+    #             predicted_label, confidence = model.predict(img_path)
+    #             
+    #             if confidence < threshold:
+    #                 print(f"{os.path.basename(img_path)}: NOT ENROLLED (confidence: {confidence:.2f})")
+    #             else:
+    #                 print(f"{os.path.basename(img_path)}: Recognized as {model.label_names[predicted_label]} (confidence: {confidence:.2f})")
+    #         except Exception as e:
+    #             print(f"Error processing {os.path.basename(img_path)}: {e}")
     
     print("\n" + "="*60)
     print("Training and evaluation completed!")
