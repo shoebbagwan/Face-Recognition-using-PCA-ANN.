@@ -99,10 +99,10 @@ dataset/
 ```
 
 ### Dataset Requirements
-- Images should be in common formats (JPG, PNG, BMP)
-- Each person should have their own subdirectory
-- Minimum 5-10 images per person recommended
-- Images will be automatically resized to 92x112 pixels
+- Images should be in common formats (JPG, PNG, BMP).
+- Each person should have their own subdirectory.
+- Minimum 5-10 images per person recommended.
+- Images will be automatically resized to 92x112 pixels.
 
 ### Popular Datasets You Can Use
 - **AT&T (ORL) Face Database**: 40 subjects, 10 images each
